@@ -1,52 +1,85 @@
-Cancer Classification from Gene Expression Data
-A machine learning pipeline that classifies leukemia subtype (ALL vs. AML) from gene expression profiles, using the classic Golub et al. leukemia dataset.
-Overview
-This project applies dimensionality reduction and classification to high-dimensional gene expression data — a core bioinformatics problem where the number of features (genes) far exceeds the number of samples (patients).
-Dataset
-Source: Gene Expression Dataset (Golub et al.) via Kaggle
-Samples: 72 patients total (38 in the original training file, 34 in the independent test file, recombined and re-split for this project), each labeled as ALL (Acute Lymphoblastic Leukemia, 47 samples) or AML (Acute Myeloid Leukemia, 25 samples)
-Features: 7,129 gene expression measurements per patient
-Approach
-Preprocessing: merged the training and independent test expression files, transposed the data so patients are rows and genes are columns, and matched each patient to their diagnosis label
-Scaling: standardized all gene expression values before dimensionality reduction
-Dimensionality reduction: applied PCA to reduce ~7,000 gene features down to a small number of principal components, since the number of genes far exceeds the number of patients
-Classification: trained a Random Forest classifier on the reduced feature space to predict ALL vs. AML
-Interpretation: examined which genes contribute most heavily to the top principal components, to connect the model back to biologically meaningful features rather than treating it as a black box
-Results
-Dataset size: 72 patients total (47 ALL, 25 AML) — 57 for training, 15 held out for testing
-PCA: reduced 7,129 gene features to 20 principal components, capturing ~64% of total variance
-Test accuracy: 80% (12/15 correct)
-Class
-Precision
-Recall
-F1-score
-Support
-ALL
-0.82
-0.90
-0.86
-10
-AML
-0.75
-0.60
-0.67
-5
-The model performs noticeably better on ALL than AML, likely reflecting the class imbalance in the dataset (47 ALL vs. 25 AML samples) and the very small test set (only 15 samples) — with this few samples, each misclassification shifts the reported metrics substantially, so these numbers should be read as a first estimate rather than a precise measure of real-world performance.
-Tech Stack
-Python
-pandas, NumPy
-scikit-learn (PCA, Random Forest, train/test split, evaluation metrics)
-matplotlib, seaborn (visualization)
-Why PCA Before Classification
-With far more genes (~7,000) than patients (~72), training a classifier directly on raw gene expression risks severe overfitting. PCA compresses the feature space into a smaller number of components that capture most of the variance in the data, making the classification problem tractable and reducing the risk of the model memorizing noise.
-Next Steps
-Try feature selection methods (e.g., selecting genes by variance or differential expression) as an alternative or complement to PCA
-Cross-validate rather than relying on a single train/test split, given the small sample size
-Compare Random Forest against simpler models (e.g., logistic regression, SVM) which are often used in the genomics literature for small-sample, high-dimensional problems
-How to Run
-Get a Kaggle API token (kaggle.json) from your Kaggle account settings
-Open cancer_classification_gene_expression.ipynb in Google Colab
-Upload your kaggle.json when prompted
-Run all cells in order
-Author
-Md Bashirun Sultana
+# Cancer Classification from Gene Expression Data
+
+A machine learning pipeline that classifies leukemia subtypes (**ALL vs. AML**) from gene expression profiles using the classic Golub et al. dataset.
+
+---
+
+## Overview
+
+This project applies dimensionality reduction and machine learning classification to high-dimensional gene expression data. It addresses a fundamental bioinformatics challenge where the feature space (number of genes) vastly outnumbers the sample size (number of patients).
+
+---
+
+## Dataset
+
+* **Source:** [Gene Expression Dataset (Golub et al.)](https://www.kaggle.com) via Kaggle
+* **Samples:** 72 total patients
+  * **ALL** (Acute Lymphoblastic Leukemia): 47 samples
+  * **AML** (Acute Myeloid Leukemia): 25 samples
+  * *Note: The original training (38) and test (34) datasets were recombined and re-split for this pipeline.*
+* **Features:** 7,129 gene expression measurements per patient
+
+---
+
+## Methodology & Pipeline
+
+1. **Preprocessing:** Merged training and test expression matrices, transposed the data matrix so samples represent rows and genes represent columns, and aligned each patient to their diagnostic label.
+2. **Scaling:** Standardized gene expression values ($\mu = 0, \sigma = 1$) prior to feature reduction.
+3. **Dimensionality Reduction:** Applied Principal Component Analysis (**PCA**) to compress ~7,000 features into a lower-dimensional subspace while preserving maximal variance.
+4. **Classification:** Trained a **Random Forest Classifier** on the top principal components to predict leukemia subtype (ALL vs. AML).
+5. **Interpretability:** Analyzed gene feature loadings on the top principal components to identify biological markers driving model predictions.
+
+---
+
+## Results
+
+* **Data Split:** 57 training samples / 15 test samples
+* **PCA Variance:** Reduced 7,129 gene features to 20 principal components, capturing **~64% of total variance**.
+* **Overall Test Accuracy:** **80%** (12/15 correct predictions)
+
+### Classification Report
+
+| Class | Precision | Recall | F1-Score | Support |
+| :--- | :---: | :---: | :---: | :---: |
+| **ALL** | 0.82 | 0.90 | 0.86 | 10 |
+| **AML** | 0.75 | 0.60 | 0.67 | 5 |
+
+*Performance Note:* The model demonstrates higher predictive accuracy on the ALL class, primarily due to class imbalance (47 ALL vs. 25 AML) and the limited test set size (15 samples). 
+
+---
+
+## Tech Stack
+
+* **Language:** Python
+* **Data Processing:** `pandas`, `NumPy`
+* **Machine Learning:** `scikit-learn` (`PCA`, `RandomForestClassifier`, `train_test_split`, `metrics`)
+* **Visualization:** `matplotlib`, `seaborn`
+
+---
+
+## Why PCA Before Classification?
+
+Training classifiers directly on ~7,000 continuous features with only 72 instances leads to severe overfitting (the *curse of dimensionality*). Using PCA compresses the dataset into orthogonal components capturing dominant expression variance, enabling robust classification while reducing noise sensitivity.
+
+---
+
+## Future Improvements
+
+* **Feature Selection:** Experiment with variance thresholding or differential expression analysis (ANOVA, $t$-tests) as alternatives or pre-filters for PCA.
+* **Cross-Validation:** Implement Stratified $K$-Fold cross-validation to get a more reliable performance estimate given the small sample size.
+* **Model Benchmarking:** Evaluate lightweight models common in genomic literature, such as Logistic Regression (L1/L2 regularized) or Support Vector Machines (SVM).
+
+---
+
+## How to Run
+
+1. Download your Kaggle API token (`kaggle.json`) from your Kaggle account settings.
+2. Open [`cancer_classification_gene_expression.ipynb`](cancer_classification_gene_expression.ipynb) in Google Colab.
+3. Upload `kaggle.json` when prompted by the notebook interface.
+4. Run all cells sequentially.
+
+---
+
+## Author
+
+**Md Bashirun Sultana**
